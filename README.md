@@ -26,7 +26,7 @@ Currently scrapes through imdb for nearby theaters and returns a json array of T
                 ]
             },
         ],
-	    "theatre": "AMC Loews New Brunswick 18"
+	"theatre": "AMC Loews New Brunswick 18"
     }
 ]
 ```
