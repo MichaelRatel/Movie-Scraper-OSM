@@ -1,5 +1,9 @@
 # Python Web Scraper 
-Currently scrapes through imdb for nearby theaters and returns a json of theatre -> (movie & showtime)
+Currently scrapes through imdb for nearby theaters and returns a json array of Theatre -> Movie & Showtimes
+
+
+
+### JSON Structure
 
 ```
 [
@@ -27,7 +31,7 @@ Currently scrapes through imdb for nearby theaters and returns a json of theatre
 ]
 ```
 
-## To Start
+### To Start
 
 ```
 $ python scraping_imdb.py
