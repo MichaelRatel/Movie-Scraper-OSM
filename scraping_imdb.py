@@ -15,7 +15,7 @@ CLIENT = uReq('https://www.imdb.com/showtimes/US/14726')
 PAGE_HTML = CLIENT.read()
 CLIENT.close()
 
-PAGE_SOUP = BeautifulSoup(PAGE_HTML, "lxml")
+PAGE_SOUP = BeautifulSoup(PAGE_HTML, "html")
 CONTAINERS = PAGE_SOUP.findAll('div', {"class":"list_item"})
 OSM = overpy.Overpass()
 
@@ -71,7 +71,7 @@ def get_all_info():
         #print "-----------------"
     endtime = time.time()
     elapsed = endtime - startTime
-    print("Elapsed time for query: " + elapsed)
+    print(elapsed)
 
 app = Flask(__name__)
 
