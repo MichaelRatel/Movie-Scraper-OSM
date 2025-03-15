@@ -2,23 +2,34 @@
 Test of Beautiful Soup Scraping Library
     Scraping imdb.com for movies 
 '''
-from urllib2 import urlopen as uReq
-from bs4 import BeautifulSoup as soup
+import time
+from urllib.request import urlopen as uReq
+from bs4 import BeautifulSoup
 import json
 from flask import Flask, jsonify, request
+import overpy
 
-MY_URL = 'https://www.imdb.com/showtimes/?pf_rd_m=A2FGELUUNOQJNL&pf_rd_p=8872b8ce-ede1-42d7-ad7a-9ac8ef50b844&pf_rd_r=KZMHYANGCNHFXEFS589R&pf_rd_s=right-5&pf_rd_t=15061&pf_rd_i=homepage&ref_=hm_sh_lk1'
-CLIENT = uReq(MY_URL)
+
+MY_URL = 'https://www.imdb.com/showtimes/US/'
+CLIENT = uReq('https://www.imdb.com/showtimes/US/14726')
 PAGE_HTML = CLIENT.read()
 CLIENT.close()
 
-PAGE_SOUP = soup(PAGE_HTML, "html")
+PAGE_SOUP = BeautifulSoup(PAGE_HTML, "lxml")
 CONTAINERS = PAGE_SOUP.findAll('div', {"class":"list_item"})
+OSM = overpy.Overpass()
+
+NY_ZIP_CODES = range(10000, 14672) # use for collecting entire set
+BROOKLYN_ZIP_CODES = range(10000, 10100) # use for testing overlapping datapoints
+UB_ZIP_CODES = range(14261, 14262) # use for testing small subsets quickly
 
 theatreList = []
+foundTheatres = []
 
-def addTheatre(dictionaryName, name, shows):
+def addTheatre(dictionaryName, name, shows, location):
+    foundTheatres.append(name)
     dictionaryName['theatre'] = name
+    dictionaryName['location'] = location
     dictionaryName['movies'] = shows
     theatreList.append(dictionaryName)
 
@@ -27,23 +38,40 @@ def get_all_info():
     theatre_name = ''
     movie_title = ''
     showtimes = ''
-    for container in CONTAINERS:
-        theatre_name = container.div.a.getText()
-        showsByTheatre = dict()
-        if(len(theatre_name) > 2):
-            #print 'Theatre: ' + theatre_name 
-            movies = []
-            for movie_container in container.findAll('div', {'class':'info'}):
-                moviesAndShowtimes = dict()
-                movie_title = movie_container.find('a', {'itemprop':'url'})
-                #print '----------- Movies ' + movie_title.getText() 
-                showtimes = map(lambda x:x.getText(), movie_container.findAll('a',{'rel':'nofollow'}))
-                showtimeList = list(showtimes)
-                moviesAndShowtimes['movie'] = movie_title.getText()
-                moviesAndShowtimes['times'] = showtimeList
-                movies.append(moviesAndShowtimes)
-            addTheatre(showsByTheatre, theatre_name, movies)
-    #print "-----------------"
+    theatre_address = ''
+
+    startTime = time.time()
+    for zip in range(14261, 14262): 
+        currentClient = uReq(MY_URL + str(zip))
+        curHTML = currentClient.read()
+        currentClient.close()
+        page = BeautifulSoup(curHTML, "html")
+        CONTAINERS = PAGE_SOUP.findAll('div', {"itemtype":"http://schema.org/MovieTheater"})
+        for container in CONTAINERS:
+            theatre_name = container.div.a.getText()
+            if theatre_name in foundTheatres:
+                continue
+            theatre_address = container.find('div', {'class' : 'address'}).find('div').getText().split('|')[0].strip().replace("\n", " ")
+            
+            showsByTheatre = dict()
+            if(len(theatre_name) > 2 and not (theatre_name in foundTheatres) ):
+                print ("Theatre: " + theatre_name )
+                movies = []
+                for movie_container in container.findAll('div', {'class':'info'}):
+                    moviesAndShowtimes = dict()
+                    movie_title = movie_container.find('a', {'itemprop':'url'})
+
+                    showtimes = map(lambda x:x.getText().strip(), movie_container.findAll('a',{'rel':'nofollow'}))
+                    showtimeList = list(showtimes)
+
+                    moviesAndShowtimes['movie'] = movie_title.getText()
+                    moviesAndShowtimes['times'] = showtimeList
+                    movies.append(moviesAndShowtimes)
+                addTheatre(showsByTheatre, theatre_name, movies, theatre_address)
+        #print "-----------------"
+    endtime = time.time()
+    elapsed = endtime - startTime
+    print("Elapsed time for query: " + elapsed)
 
 app = Flask(__name__)
 
