@@ -8,9 +8,16 @@ import math
 # treat each theater -> movie -> showtime as its own key
 
 def main():
+    buildUserTable()
+    buildShowtimeTable()
+    buildTheaterTable()
+    buildPricingTable
+    buildTravelPaths()
     buildMovieTable()
+    buildCastTable()
 
 
+#Function for testing
 def buildNormalTable():
     with open("data.json") as f:
         jsonData = json.load(f)

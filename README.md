@@ -1,5 +1,6 @@
-# Python Web Scraper 
-Currently scrapes through imdb for nearby theaters and returns a json array of Theatre -> Movie & Showtimes
+# Python Web Scraper
+Fork of jmoussa's IMDB Scraper that connects theater -> geopositional location. May no longer work due to IMDB's formatting update. 
+Currently scrapes through imdb for nearby theaters and returns a json array of Theatre -> Movie & Showtimes + Location + OSM ID
 
 
 
@@ -26,7 +27,9 @@ Currently scrapes through imdb for nearby theaters and returns a json array of T
                 ]
             },
         ],
-	"theatre": "AMC Loews New Brunswick 18"
+	"theatre": "Alamo Drafthouse Cinema - Downtown Brooklyn"
+    "location": "445 Albee Square West, Brooklyn NY 11201"
+    "mapID": "node/4620805945"
     }
 ]
 ```
@@ -37,3 +40,9 @@ Currently scrapes through imdb for nearby theaters and returns a json array of T
 $ python scraping_imdb.py
 ```
 Navigate to: localhost:5000/getMovies
+
+Save the output as data.json, and place in the same directory
+```
+$ python format_csv.py
+```
+Will generate full output with dummy data
